@@ -12,7 +12,7 @@ const Address = () => {
     city: "",
     state: "",
     country: "",
-     pincode: "",
+     Pincode: "",
     phoneNumber: "",
   });
   const onChangerHandler = (e) => {
