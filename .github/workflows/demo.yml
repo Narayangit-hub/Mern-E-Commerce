@@ -1,26 +1,24 @@
-name: Backend Deploy
+name: Deploy Backend to Azure VM
 
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: mera
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy to Azure VM
-        uses: appleboy/ssh-action@v1.2.0
+      - name: Deploy Backend via SSH
+        uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ secrets.AZURE_VM_HOST }}
-          username: ${{ secrets.AZURE_VM_USERNAME }}
-          key: ${{ secrets.AZURE_VM_PRIVATE_KEY }}
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
           script: |
-            cd ~/Mern-E-Commerce/backend
-            git pull origin main
-            npm install
-            pm2 restart ecommerce-backend
+            bash /home/azureuser/deploy.sh
