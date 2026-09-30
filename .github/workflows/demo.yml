@@ -1,4 +1,4 @@
-name: Deploy Frontend and Backend
+name: Deploy MERN Application
 
 on:
   push:
@@ -6,9 +6,8 @@ on:
       - master
 
 jobs:
-
-  frontend:
-    name: Deploy Frontend
+  deploy:
+    name: Deploy Frontend and Backend
     runs-on: ubuntu-latest
     environment: mera
 
@@ -16,30 +15,39 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy Frontend via SSH
+      - name: Deploy MERN Application to Azure VM
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           script: |
-            bash /home/azureuser/deploy-frontend.sh
+            cd /home/azureuser/Mern-E-Commerce
 
+            git pull origin master
 
-  backend:
-    name: Deploy Backend
-    runs-on: ubuntu-latest
-    environment: mera
+            echo "Deploying Backend..."
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+            cd backend
 
-      - name: Deploy Backend via SSH
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.DEPLOY_KEY }}
-          script: |
-            bash /home/azureuser/deploy-backend.sh
+            npm install
+
+            pm2 restart ecommerce-backend || pm2 start server.js --name ecommerce-backend
+
+            echo "Backend deployed successfully"
+
+            cd ../frontend
+
+            echo "Installing Frontend dependencies..."
+
+            npm install
+
+            echo "Building Frontend..."
+
+            npm run build
+
+            echo "Frontend deployed successfully"
+
+            sudo rm -rf /var/www/html/*
+
+            sudo cp -r dist/* /var/www/html/
