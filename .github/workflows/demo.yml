@@ -1,30 +1,35 @@
-name: E-Commerce CI
+name: Backend Deploy to Azure VM
 
 on:
   push:
     branches:
       - main
 
-  pull_request:
-    branches:
-      - main
-
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
-      - name: Install dependencies
+      - name: Install backend dependencies
+        working-directory: backend
         run: npm install
 
-      - name: Build project
-        run: npm run build
+      - name: Deploy to Azure VM
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.AZURE_VM_HOST }}
+          username: ${{ secrets.AZURE_VM_USERNAME }}
+          key: ${{ secrets.AZURE_VM_PRIVATE_KEY }}
+          script: |
+            cd ~/Mern-E-Commerce/backend
+            git pull origin main
+            npm install
+            pm2 restart ecommerce-backend
