@@ -1,4 +1,4 @@
-name: Deploy Backend to Azure VM
+name: Deploy Frontend and Backend
 
 on:
   push:
@@ -6,7 +6,28 @@ on:
       - master
 
 jobs:
-  deploy:
+
+  frontend:
+    name: Deploy Frontend
+    runs-on: ubuntu-latest
+    environment: mera
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy Frontend via SSH
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            bash /home/azureuser/deploy-frontend.sh
+
+
+  backend:
+    name: Deploy Backend
     runs-on: ubuntu-latest
     environment: mera
 
@@ -21,4 +42,4 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           script: |
-            bash /home/azureuser/deploy.sh
+            bash /home/azureuser/deploy-backend.sh
