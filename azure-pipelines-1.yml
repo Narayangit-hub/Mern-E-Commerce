@@ -5,25 +5,30 @@
 
 
 
+
 trigger:
   - main
 
 pool:
-  vmImage: ubuntu-latest
+  name: MERN-VM-Agent
 
 steps:
-  - task: NodeTool@1
+  - task: UseNode@1
     inputs:
-      versionSpec: '20.x'
+      version: '20.x'
     displayName: 'Install Node.js'
 
-  - script: npm install
+  - script: npm ci
     displayName: 'Install dependencies'
 
   - script: npm test --if-present
     displayName: 'Run tests'
 
-  - script: npm run build --if-present
-    displayName: 'Build application'
+  - script: npm run build
+    displayName: 'Build React application'
 
-
+  - script: |
+      mkdir -p /var/www/mern-ecommerce
+      cp -r dist/. /var/www/mern-ecommerce/
+      echo "Frontend deployment completed successfully"
+    displayName: 'Deploy to Nginx'
